@@ -100,6 +100,7 @@ class Menu(object):
         self.conf_icons = get_config('MENU_ICONS')
         self.conf_menu_order = get_config('MENU_ORDER')
         self.conf_menu = get_config('MENU')
+        self.conf_menu_prepend = get_config('MENU_PREPEND')
 
     def get_app_list(self):
         menu = None
@@ -110,17 +111,27 @@ class Menu(object):
         else:
             menu = self.make_menu_from_native_only()
 
+        if self.conf_menu_prepend:
+            menu = self.prepend_menu(menu, self.conf_menu_prepend)
+
         # Add icons and match active
         if menu:
             self.activate_menu(menu)
 
         return menu
 
+    def prepend_menu(self, menu, config):
+        """
+        Places custom menu options at the top
+        """
+        return self.make_menu(config) + menu
+
     def make_menu(self, config):
         menu = []
         if not isinstance(config, (tuple, list)):
             raise TypeError('Django Suit MENU config parameter must be '
                             'tuple or list. Got %s' % repr(config))
+
         for app in config:
             app = self.make_app(app)
             if app:
